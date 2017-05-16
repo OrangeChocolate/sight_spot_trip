@@ -8,9 +8,6 @@ import org.neo4j.ogm.annotation.GraphId;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
-
 //@JsonIdentityInfo(generator=ObjectIdGenerators.PropertyGenerator.class, property="relationId")
 @RelationshipEntity(type = "CONNECT")
 public class SightSpotEdge implements Serializable{

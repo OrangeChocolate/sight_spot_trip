@@ -19,19 +19,20 @@
 
 package springfox.documentation.schema;
 
-import com.fasterxml.classmate.ResolvedType;
-import com.fasterxml.classmate.TypeBindings;
-import com.fasterxml.classmate.TypeResolver;
-import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
+import static com.google.common.collect.Iterables.any;
+import static com.google.common.collect.Iterables.toArray;
+import static com.google.common.collect.Lists.newArrayList;
 
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.Iterator;
 import java.util.List;
 
-import static com.google.common.collect.Iterables.*;
-import static com.google.common.collect.Lists.*;
+import com.fasterxml.classmate.ResolvedType;
+import com.fasterxml.classmate.TypeBindings;
+import com.fasterxml.classmate.TypeResolver;
+import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 
 public class WildcardType {
   private WildcardType() {

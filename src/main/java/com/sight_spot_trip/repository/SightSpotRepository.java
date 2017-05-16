@@ -1,16 +1,13 @@
 package com.sight_spot_trip.repository;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import org.neo4j.cypher.internal.compiler.v2_3.planner.logical.greedy.findShortestPaths;
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.GraphRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
-import com.sight_spot_trip.entity.SightSpotEdge;
 import com.sight_spot_trip.entity.SightSpotEdgeWrapper;
 import com.sight_spot_trip.entity.SightSpotNode;
 

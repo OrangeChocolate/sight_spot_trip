@@ -9,11 +9,7 @@ import org.neo4j.ogm.annotation.GraphId;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 
 // see http://stackoverflow.com/questions/27109953/jackson-with-spring-mvc-duplicate-nested-objects-not-deserializing
 //@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "nodeId")

@@ -4,15 +4,11 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import org.slf4j.Logger;
@@ -21,11 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import com.sight_spot_trip.ServerInitializer;
 import com.sight_spot_trip.entity.SightSpotEdge;
-import com.sight_spot_trip.entity.SightSpotEdgeWrapper;
 import com.sight_spot_trip.entity.SightSpotNode;
 import com.sight_spot_trip.repository.SightSpotRepository;
 
