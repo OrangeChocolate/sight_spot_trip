@@ -1,0 +1,61 @@
+.cy-examples {
+	height: 500px;
+	width: 100%
+}
+
+.bs-callout-info {
+	border-left-color: #1b809e;
+}
+
+.bs-callout {
+	padding: 20px;
+	margin: 20px 0;
+	border: 1px solid #eee;
+	border-left-width: 5px;
+	border-radius: 3px;
+}
+
+.default-cytoscape-size {
+	height: 500px;
+	width: 100%;
+}
+
+#view.slide-in.ng-enter, #view.slide-in.ng-leave {
+	position: absolute;
+	left: 30px;
+	right: 30px;
+	transition: 0.5s all ease;
+	-moz-transition: 0.5s all ease;
+	-webkit-transition: 0.5s all ease;
+}
+
+#view.slide-in.ng-enter {
+	-webkit-animation: slideInRight 0.5s both ease;
+	-moz-animation: slideInRight 0.5s both ease;
+	animation: slideInRight 0.5s both ease;
+}
+
+#view.slide-in.ng-leave {
+	-webkit-animation: slideOutLeft 0.5s both ease;
+	-moz-animation: slideOutLeft 0.5s both ease;
+	animation: slideOutLeft 0.5s both ease;
+}
+
+.form-group {
+	padding-bottom: 7px;
+	margin: 0;
+}
+
+.form-group .inline-select {
+	width: 150px;
+}
+
+.row-without-margin-left-right {
+	margin-right: 0;
+	margin-left: 0;
+}
+
+/** fix body height background color **/
+body, html {
+    overflow: auto;
+}

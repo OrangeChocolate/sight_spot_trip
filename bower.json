@@ -1,0 +1,30 @@
+{
+  "name": "sight_spot_trip",
+  "authors": [
+    "liudonghua123 <liudonghua123@gmail.com>"
+  ],
+  "description": "",
+  "main": "",
+  "license": "MIT",
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "src/main/resources/static/libs",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "ngCytoscape": "^0.0.6",
+    "bootstrap-material-design": "v0.5.10",
+    "highlight": "^9.11.0",
+    "angular": "^1.6.4",
+    "angular-loader": "^1.6.4",
+    "angular-mocks": "^1.6.4",
+    "angular-route": "^1.6.4",
+    "angular-material": "^1.1.4",
+    "angular-ui-router": "^1.0.3",
+    "angular-highlightjs": "^0.7.1"
+  }
+}

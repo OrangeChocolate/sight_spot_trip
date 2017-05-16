@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sight Spot Trip</title>
+    <link rel="stylesheet" href="libs/bootstrap/dist/css/bootstrap.css">
+    <link rel="stylesheet" href="libs/highlight/src/styles/default.css">
+    <link rel="stylesheet" href="libs/bootstrap-material-design/dist/css/bootstrap-material-design.css">
+    <link rel="stylesheet" href="libs/angular-material/angular-material.min.css">
+    <link rel="stylesheet" href="css/app.css">
+    <style>
+        .ngCytoscape{
+            height: 100%;
+            width: 100%
+        }
+        .forkme > img {
+            position: absolute;
+            top: 0;
+            right: 0;
+            border: 0;
+            z-index: 1040;
+        }
+    </style>
+</head>
+<body ng-app="app">
+<div class="navbar navbar-inverse">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-inverse-collapse"></button>
+            <a class="navbar-brand" href="#">Sight Spot Trip</a>
+        </div>
+    </div>
+</div>
+<div ng-controller="appCntrl">
+
+
+    <div class="container-fluid">
+        <div class="jumbotron" >
+            Sight Spot Trip
+        </div>
+    </div>
+<div class="container-fluid">
+    <div class="row">
+    <div class="col-md-2 col-lg-2">
+        <div class="list-group">
+            <button class="btn btn-raised btn-info btn-block" ui-sref="defaults">查找最短路径</md-button>
+            <button class="btn btn-raised btn-info btn-block" ui-sref="core">关于</md-button>
+        </div>
+    </div>
+    <div class="col-md-10 col-lg-10">
+        <div id="view" ui-view> </div>
+    </div>
+</div>
+    </div>   
+    </div>
+<script src="libs/highlight/src/highlight.js"></script>
+<script src="libs/angular/angular.min.js"></script>
+<script src="libs/angular-animate/angular-animate.min.js"></script>
+<script src="libs/angular-aria/angular-aria.min.js"></script>
+<script src="libs/angular-messages/angular-messages.min.js"></script>
+<script src="libs/cytoscape/dist/cytoscape.min.js"></script>
+<script src="libs/angular-route/angular-route.min.js"></script>
+<script src="libs/angular-ui-router/release/angular-ui-router.min.js"></script>
+<script src="libs/angular-material/angular-material.min.js"></script>
+
+<script src="js/app.js"></script>
+<script src="libs/ngCytoscape/dst/ngCytoscape.min.js"></script>
+<script src="libs/angular-highlightjs/angular-highlightjs.min.js"></script>
+</body>
+</html>
