@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.neo4j.driver.internal.InternalPath;
 import org.neo4j.driver.v1.types.Node;
