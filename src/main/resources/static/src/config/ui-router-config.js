@@ -17,6 +17,11 @@
                     url: "/about",
                     templateUrl: "templates/about.html",
                     controller: 'aboutController'
+                })
+                .state('admin', {
+                    url: "/admin",
+                    templateUrl: "templates/admin.html",
+                    controller: 'adminController'
                 });
         });
 })();

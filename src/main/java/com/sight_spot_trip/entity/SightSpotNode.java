@@ -32,6 +32,16 @@ public class SightSpotNode implements Serializable {
 
 	@Relationship(type = "CONNECT", direction = Relationship.UNDIRECTED)
 	private Set<SightSpotNode> neighbors = new HashSet<>();
+	
+	/**
+	 * Bus node
+	 */
+	private Set<String> buses = new HashSet<>();
+	
+	/**
+	 * Bus startNode
+	 */
+	private Set<String> startBuses;
 
 	public SightSpotNode() {
 	}
@@ -89,12 +99,36 @@ public class SightSpotNode implements Serializable {
 		this.neighborEdges = neighborEdges;
 	}
 
+	public void addNeighborEdge(SightSpotEdge edge) {
+		this.neighborEdges.add(edge);
+	}
+
 	public String getDescription() {
 		return description;
 	}
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	public Set<String> getBuses() {
+		return buses;
+	}
+
+	public void setBuses(Set<String> buses) {
+		this.buses = buses;
+	}
+
+	public void addBus(String busName) {
+		this.buses.add(busName);
+	}
+
+	public Set<String> getStartBuses() {
+		return startBuses;
+	}
+
+	public void setStartBuses(Set<String> startBuses) {
+		this.startBuses = startBuses;
 	}
 
 	@Override

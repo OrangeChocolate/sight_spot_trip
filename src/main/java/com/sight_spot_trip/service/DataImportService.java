@@ -4,11 +4,15 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.slf4j.Logger;
@@ -18,9 +22,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
+import com.sight_spot_trip.entity.PairOrderIndependent;
 import com.sight_spot_trip.entity.SightSpotEdge;
 import com.sight_spot_trip.entity.SightSpotNode;
 import com.sight_spot_trip.repository.SightSpotRepository;
+
+import scala.reflect.internal.Trees.New;
 
 @Service
 public class DataImportService {
@@ -33,20 +40,26 @@ public class DataImportService {
 	@Value(value = "classpath:data/sight_spot_edge.csv")
 	private Resource edgeResources;
 
+	@Value(value = "classpath:data/sight_spot_bus.csv")
+	private Resource busResources;
+
 	@Autowired
 	private SightSpotRepository sightSpotRepository;
 
 	private Map<String, SightSpotNode> cachedNodes = new HashMap<>();
 	private Map<String, SightSpotEdge> cachedEdges = new HashMap<>();
+	private Map<PairOrderIndependent<String>, SightSpotEdge> cachedPairEdges = new HashMap<>();
+	private Map<String, List<String>> cachedBuses = new HashMap<>();
 	private Map<String, Set<SightSpotNode>> cachedRelatedNodes = new HashMap<>();
 	private Map<String, Set<SightSpotEdge>> cachedRelatedEdges = new HashMap<>();
+	private Map<PairOrderIndependent<String>, List<String>> cachedRelatedBuses = new HashMap<>();
 
 	private void parseNode() {
 		try (Stream<String> lines = Files.lines(Paths.get(nodeResources.getURI()), Charset.defaultCharset())) {
 			lines.forEach(line -> {
 				if (line != null && !line.equals("") && !line.startsWith("#")) {
 					String[] parts = line.split("\\s*,\\s*");
-					if (parts.length != 3) {
+					if (parts.length < 3) {
 						logger.error("error parsing the node line {}", line);
 						return;
 					}
@@ -66,7 +79,7 @@ public class DataImportService {
 			lines.forEach(line -> {
 				if (line != null && !line.equals("") && !line.startsWith("#")) {
 					String[] parts = line.split("\\s*,\\s*");
-					if (parts.length != 8) {
+					if (parts.length < 8) {
 						logger.error("error parsing the edge line {}", line);
 						return;
 					}
@@ -81,8 +94,28 @@ public class DataImportService {
 					SightSpotEdge edge = new SightSpotEdge(relationId, label, cachedNodes.get(node1Id),
 							cachedNodes.get(node2Id), distance, time, cost, description);
 					cachedEdges.put(relationId, edge);
+					cachedPairEdges.put(new PairOrderIndependent<>(node1Id, node2Id), edge);
 					updateCachedRelatedNodes(cachedNodes.get(node1Id), cachedNodes.get(node2Id));
 					updateCachedRelatedEdges(cachedNodes.get(node1Id), edge);
+				}
+			});
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void parseBus() {
+		try (Stream<String> lines = Files.lines(Paths.get(busResources.getURI()), Charset.defaultCharset())) {
+			lines.forEach(line -> {
+				if (line != null && !line.equals("") && !line.startsWith("#")) {
+					String[] parts = line.split("\\s*,\\s*");
+					if (parts.length < 2) {
+						logger.error("error parsing the bus line {}", line);
+						return;
+					}
+					String busName = parts[0];
+					List<String> buses = Stream.of(parts[1].split("\\|")).collect(Collectors.toList());
+					cachedBuses.put(busName, buses);
 				}
 			});
 		} catch (IOException e) {
@@ -134,6 +167,65 @@ public class DataImportService {
 			cachedNodes.put(entry.getKey(), persistedNode);
 		}
 	}
+	
+	Map<String, List<String>> nodeBusesMap = new HashMap<>();
+	Map<PairOrderIndependent<String>, List<String>> edgeBusesMap = new HashMap<>();
+	
+	private void parseBusReverse() {
+		Set<Entry<String, List<String>>> entrySet = cachedBuses.entrySet();
+		for(Entry<String, List<String>> entry : entrySet) {
+			String busName = entry.getKey();
+			List<String> busNodes = entry.getValue();
+			
+			for(String nodeId: busNodes) {
+				List<String> list = nodeBusesMap.get(nodeId);
+				if(list == null) {
+					list = new ArrayList<String>();
+				}
+				if(!list.contains(busName)) {
+					list.add(busName);
+				}
+				nodeBusesMap.put(nodeId, list);
+			}
+			
+			for(int i = 0; i< busNodes.size() - 1; i++) {
+				String node1 = busNodes.get(i);
+				String node2 = busNodes.get(i + 1);
+				PairOrderIndependent<String> edge = new PairOrderIndependent<String>(node1, node2);
+				List<String> list = edgeBusesMap.get(edge);
+				if(list == null) {
+					list = new ArrayList<String>();
+				}
+				if(!list.contains(busName)) {
+					list.add(busName);
+				}
+				edgeBusesMap.put(edge, list);
+			}
+		}
+	}
+
+	private void updateBuses() {
+		Set<Entry<String, SightSpotNode>> entrySet = cachedNodes.entrySet();
+		for (Entry<String, SightSpotNode> entry : entrySet) {
+			SightSpotNode node = entry.getValue();
+			List<String> nodeBusList = nodeBusesMap.get(node.getNodeId());
+			if (nodeBusList != null) {
+				node.setBuses(new HashSet<String>(nodeBusesMap.get(node.getNodeId())));
+			}
+			Set<SightSpotEdge> relatedEdges = cachedRelatedEdges.get(entry.getKey());
+			for (SightSpotEdge edge : relatedEdges) {
+				List<String> edgeBusList = edgeBusesMap.get(
+						new PairOrderIndependent<String>(edge.getNode1().getNodeId(), edge.getNode2().getNodeId()));
+				if (edgeBusList != null) {
+					edge.setBuses(new HashSet<String>(edgeBusList));
+				}
+			}
+			node.setNeighborEdges(relatedEdges);
+			SightSpotNode persistedNode = sightSpotRepository.save(node);
+			cachedNodes.put(entry.getKey(), persistedNode);
+		}
+	}
+	
 
 	private void test() {
 		Iterable<SightSpotNode> nodes = sightSpotRepository.findAll();
@@ -156,6 +248,10 @@ public class DataImportService {
 		insertNodes();
 		// update neighbors
 		updateNeighbors();
+		
+		parseBus();
+		parseBusReverse();
+		updateBuses();
 
 		test();
 	}

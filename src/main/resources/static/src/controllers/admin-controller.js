@@ -1,7 +1,7 @@
 (function(){
     'use strict';
 
-    angular.module('app').controller('homeController', function ($scope, cytoData, $http, $timeout, utils){
+    angular.module('app').controller('adminController', function ($scope, cytoData, $http, $timeout, $state, utils){
         $scope.defaults = {
             zoomingEnabled: true,
             userPanningEnabled: true
@@ -118,71 +118,66 @@
             });
         });
         
-        $http.get("/busNames").then(function (response) {
-        	$scope.buses = response.data;
-        	$scope.bus = $scope.buses[0];
-        });
-        
-        $scope.searchBus = function() {
-        	var queryString = utils.encodeQueryData({busName: $scope.bus});
-        	$http.get("/bus?" + queryString).then(function (response) {
-                if(response.data) {
-                	$scope.pathNodes = response.data.nodes;
-                	$scope.pathEdges = response.data.edges;
-                	var displayPath = $scope.pathNodes.map(function(node) {
-                		return node.properties.nodeId;
-                	}).join("->");
-                	$scope.result = "搜索到的公交线路是：" + displayPath + ", 路程是： " + response.data.totalWeight;
-                }
-                else {
-                	$scope.result = "没有查询到公交线路";
-                }
-        	});
+        $scope.node = {
+        		nodeId: "",
+        		label: "",
+        		description: ""
         };
         
 
-        $scope.nodes = [];
-        $scope.edges = [];
-        $scope.choices = [
-        	{name: "distance", description: "距离优先"},
-        	{name: "time", description: "时间优先"},
-        	{name: "cost", description: "费用优先"},
-        	{name: "mix", description: "混合"},
-        ];
-        $scope.choice = $scope.choices[0];
-        $scope.weights = [
-        	{name: "1", value: 1},
-        	{name: "2", value: 2},
-        	{name: "3", value: 3},
-        ];
-        $scope.distanceWeight = $scope.weights[0];
-        $scope.timeWeight = $scope.weights[0];
-        $scope.costWeight = $scope.weights[0];
+		$scope.addNode = function() {
+			var data = JSON.stringify($scope.node);
+			$http.post("/nodes", data).then(
+					function(data, status, headers, config) {
+						console.log(data);
+						$state.go($state.current, {}, {reload: true});
+					}, function(data, status, headers, config) {
+						console.log(data);
+					});
+		};
+		
+
+        $scope.edge = {
+    		node1: {
+    			nodeId: ""
+    		},
+    		node2: {
+    			nodeId: ""
+    		}
+    	};
         
-        $scope.search = function() {
-        	var node1Id = $scope.startNode.nodeId;
-        	var node2Id = $scope.endNode.nodeId;
-        	var choice = $scope.choice.name;
-        	var totalWeight = $scope.distanceWeight.value + $scope.timeWeight.value + $scope.costWeight.value;
-        	var distanceWeight = $scope.distanceWeight.value * 1.0 / totalWeight;
-        	var timeWeight = $scope.timeWeight.value * 1.0 / totalWeight;
-        	var costWeight = $scope.costWeight.value * 1.0 / totalWeight;
-        	var queryString = utils.encodeQueryData({node1Id: node1Id, node2Id: node2Id, weight: choice, distanceWeight: distanceWeight, timeWeight: timeWeight, costWeight: costWeight});
-        	$http.get("/shortestpath?" + queryString).then(function (response) {
-                console.info(response);
-                if(response.data) {
-                	$scope.pathNodes = response.data.nodes;
-                	$scope.pathEdges = response.data.edges;
-                	var displayPath = $scope.pathNodes.map(function(node) {
-                		return node.properties.nodeId;
-                	}).join("->");
-                	$scope.result = "搜索到的最佳路径是：" + displayPath + ", 代价是： " + response.data.totalWeight;
-                }
-                else {
-                	$scope.result = "没有查询到最短路劲";
-                }
-        	});
-        };
+
+		$scope.addEdge = function() {
+			$scope.edge.node1.nodeId = $scope.startNode.nodeId;
+			$scope.edge.node2.nodeId = $scope.endNode.nodeId;
+			var data = JSON.stringify($scope.edge);
+			$http.post("/edges", data).then(
+					function(data, status, headers, config) {
+						console.log(data);
+						$state.go($state.current, {}, {reload: true});
+					}, function(data, status, headers, config) {
+						console.log(data);
+					});
+		};
+		
+
+        $scope.bus = {
+        	busName: "",
+        	nodeNames: []
+    	};
+        
+
+		$scope.addBus = function() {
+			$scope.bus.nodeNames = $scope.bus.nodeNames.split(/\s*,\s*/);
+			var data = JSON.stringify($scope.bus);
+			$http.post("/bus", data).then(
+					function(data, status, headers, config) {
+						console.log(data);
+						$state.go($state.current, {}, {reload: true});
+					}, function(data, status, headers, config) {
+						console.log(data);
+					});
+		};
         
         var highlightedEdges;
         $scope.animate_highlight = function() {

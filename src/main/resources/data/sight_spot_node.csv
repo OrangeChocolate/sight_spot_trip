@@ -1,4 +1,4 @@
-#node_id,node_label,node_description
+#node_id,node_label,node_description,node_buses(delimiter by |)
 1,Sight Spot 1,This is description of Sight Spot 1
 2,Sight Spot 2,This is description of Sight Spot 2
 3,Sight Spot 3,This is description of Sight Spot 3

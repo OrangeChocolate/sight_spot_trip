@@ -1,10 +1,41 @@
-<h3>查找最短路径</h3>
+<h3>管理公交线路</h3>
 <div class="row well row-without-margin-left-right">
 	<form class="form-horizontal">
 		<fieldset>
-			<legend>设置</legend>
+			<legend>新增节点</legend>
 			<div class="form-group">
-				<label for="startNode" class="col-md-2 col-lg-2 control-label">起始景点</label>
+				<label for="nodeId" class="col-md-2 col-lg-2 control-label">节点ID</label>
+				<div class="col-md-10 col-lg-10">
+					<input id="nodeId" ng-model="node.nodeId" type="text" class="form-control" placeholder="NodeId">
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="nodeLabel" class="col-md-2 col-lg-2 control-label">节点标签</label>
+				<div class="col-md-10 col-lg-10">
+					<input id="nodeLabel" ng-model="node.label" type="text" class="form-control" placeholder="nodeLabel">
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="nodeDescription" class="col-md-2 col-lg-2 control-label">节点描述</label>
+				<div class="col-md-10 col-lg-10">
+					<input id="nodeDescription" ng-model="node.description" type="text" class="form-control" placeholder="nodeDescription">
+				</div>
+			</div>
+		</fieldset>
+	</form>
+	<form class="form-horizontal">
+		<div class="form-group">
+			<div class="col-md-10 col-lg-10 col-md-offset-2 col-lg-offset-2">
+				<button type="submit" class="btn btn-raised btn-primary" ng-click="addNode()">增加节点</button>
+			</div>
+		</div>
+	</form>
+	
+	<form class="form-horizontal">
+		<fieldset>
+			<legend>新增边</legend>
+			<div class="form-group">
+				<label for="startNode" class="col-md-2 col-lg-2 control-label">起始节点</label>
 				<div class="col-md-10 col-lg-10">
 					<select id="startNode" class="form-control" ng-model="startNode">
 						<option ng-repeat="node in nodes" ng-value="node">{{node.nodeId}}-{{node.label}}</option>
@@ -12,67 +43,36 @@
 				</div>
 			</div>
 			<div class="form-group">
-				<label for="endNode" class="col-md-2 col-lg-2 control-label">结束景点</label>
+				<label for="endNode" class="col-md-2 col-lg-2 control-label">结束节点</label>
 				<div class="col-md-10 col-lg-10">
 					<select id="endNode" class="form-control" ng-model="endNode">
 						<option ng-repeat="node in nodes" ng-value="node">{{node.nodeId}}-{{node.label}}</option>
 					</select>
 				</div>
 			</div>
-			<div class="form-group">
-				<label for="choice" class="col-md-2 col-lg-2 control-label">设置最短路径方法</label>
-				<div class="col-md-10 col-lg-10">
-					<select id="choice" class="form-control" ng-model="choice">
-						<option ng-repeat="choice in choices" ng-value="choice">{{choice.description}}</option>
-					</select>
-				</div>
-			</div>
-		</fieldset>
-	</form>
-	<form id="extra-attribute" class="form-inline" ng-show="choice.name == 'mix'">
-		<fieldset class="col-md-offset-2">
-			<div class="form-group">
-				<label for="distanceWeight">距离权重:</label> 
-				<select id="distanceWeight"
-					class="form-control inline-select" ng-model="distanceWeight">
-					<option ng-repeat="weight in weights" ng-value="weight">{{weight.value}}</option>
-				</select>
-			</div>
-			<div class="form-group">
-				<label for="timeWeight">时间权重:</label> 
-				<select id="timeWeight" class="form-control inline-select"
-					ng-model="timeWeight">
-					<option ng-repeat="weight in weights" ng-value="weight">{{weight.value}}</option>
-				</select>
-			</div>
-			<div class="form-group">
-				<label for="costWeight">费用权重:</label> 
-				<select id="costWeight" class="form-control inline-select"
-					ng-model="costWeight">
-					<option ng-repeat="weight in weights" ng-value="weight">{{weight.value}}</option>
-				</select>
-			</div>
 		</fieldset>
 	</form>
 	<form class="form-horizontal">
 		<div class="form-group">
 			<div class="col-md-10 col-lg-10 col-md-offset-2 col-lg-offset-2">
-				<button type="submit" class="btn btn-raised btn-primary" ng-click="search()">计算最短路劲</button>
-				<button class="btn btn-raised btn-primary" ng-click="animate_highlight()">动画演示路径</button>
-				<button class="btn btn-raised btn-primary" ng-click="reset()">复原图</button>
+				<button type="submit" class="btn btn-raised btn-primary" ng-click="addEdge()">增加边</button>
 			</div>
 		</div>
 	</form>
-
+	
 	<form class="form-horizontal">
 		<fieldset>
-			<legend>公交信息</legend>
+			<legend>新增公交</legend>
 			<div class="form-group">
-				<label for="bus" class="col-md-2 col-lg-2 control-label">公交</label>
+				<label for="nodeId" class="col-md-2 col-lg-2 control-label">公交名称</label>
 				<div class="col-md-10 col-lg-10">
-					<select id="bus" class="form-control" ng-model="bus">
-						<option ng-repeat="bus in buses" ng-value="bus">{{bus}}</option>
-					</select>
+					<input id="nodeId" ng-model="bus.busName" type="text" class="form-control" placeholder="busName">
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="nodeLabel" class="col-md-2 col-lg-2 control-label">公交经过节点</label>
+				<div class="col-md-10 col-lg-10">
+					<input id="nodeLabel" ng-model="bus.nodeNames" type="text" class="form-control" placeholder="1,2,3,4,5">
 				</div>
 			</div>
 		</fieldset>
@@ -80,8 +80,7 @@
 	<form class="form-horizontal">
 		<div class="form-group">
 			<div class="col-md-10 col-lg-10 col-md-offset-2 col-lg-offset-2">
-				<button type="submit" class="btn btn-raised btn-primary" ng-click="searchBus()">查询公交线路</button>
-				<button class="btn btn-raised btn-primary" ng-click="reset()">复原图</button>
+				<button type="submit" class="btn btn-raised btn-primary" ng-click="addBus()">增加公交</button>
 			</div>
 		</div>
 	</form>
@@ -161,4 +160,3 @@
 			graph-layout="layout" id="defaults-graph" graph-style="styles"></cytoscape>
 	</div>
 </div>
-

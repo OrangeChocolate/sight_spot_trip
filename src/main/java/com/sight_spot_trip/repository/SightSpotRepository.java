@@ -20,11 +20,13 @@ public interface SightSpotRepository extends GraphRepository<SightSpotNode> {
 	@Query("MATCH (n:SightSpotNode) OPTIONAL MATCH (n)-[r:CONNECT]-() DELETE n,r")
 	void clean();
 	
+	SightSpotNode findByNodeId(@Param("nodeId") String nodeId);
+	
 	SightSpotNode findByLabel(@Param("label") String label);
 
 	List<SightSpotNode> findByLabelLike(@Param("label") String label);
 	
-	@Query("MATCH (s1:SightSpotNode)-[r:CONNECT]-(s2:SightSpotNode)  RETURN distinct s1 LIMIT {limit}")
+	@Query("MATCH (s1:SightSpotNode)  RETURN distinct s1 LIMIT {limit}")
 	List<SightSpotNode> findAllNodes(@Param("limit") int limit);
 	
 	@Query("MATCH (s1:SightSpotNode)-[r:CONNECT]-(s2:SightSpotNode) where s1.nodeId < s2.nodeId RETURN distinct s1, r, s2 LIMIT {limit}")
@@ -89,6 +91,12 @@ public interface SightSpotRepository extends GraphRepository<SightSpotNode> {
 			"call apoc.algo.dijkstra(from, to, 'CONNECT', 'calculated') YIELD path as shortestPath, weight as totalWeight " +
 			"return shortestPath,totalWeight;")
 	public List<Map<String, Object>> findShortestPathDistanceWeightedMixDijkstra(@Param("node1Id") String node1Id, @Param("node2Id") String node2Id);
+	
+	
+	@Query("MATCH (from:SightSpotNode), (to:SightSpotNode), path = (from)-[rels:CONNECT*]-(to) WHERE ALL(r IN rels(path) WHERE {busName} in r.buses) " +
+			"WITH COLLECT(path) AS paths, MAX(length(path)) AS maxLength " +
+			"RETURN FILTER(path IN paths WHERE length(path)= maxLength)[0] AS path")
+	public List<Map<String, Object>> findBusPath(@Param("busName") String busName);
 
 //	@Query( "START u1=node:User(key= {0}), u2=node:User(key = {1}) " +
 //	        "MATCH p = shortestPath(u1-[*]-u2) " +

@@ -1,6 +1,8 @@
 package com.sight_spot_trip.entity;
 
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.neo4j.ogm.annotation.EndNode;
@@ -34,6 +36,11 @@ public class SightSpotEdge implements Serializable{
 	private int cost;
 	
 	private String description;
+	
+	/**
+	 * Bus node
+	 */
+	private Set<String> buses = new HashSet<>();
 
 	public SightSpotEdge() {
 	}
@@ -119,6 +126,18 @@ public class SightSpotEdge implements Serializable{
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	public Set<String> getBuses() {
+		return buses;
+	}
+
+	public void setBuses(Set<String> buses) {
+		this.buses = buses;
+	}
+
+	public void addBus(String busName) {
+		this.buses.add(busName);
 	}
 
 	@Override

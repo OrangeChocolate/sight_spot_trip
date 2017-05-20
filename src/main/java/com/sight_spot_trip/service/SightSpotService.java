@@ -1,7 +1,10 @@
 package com.sight_spot_trip.service;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.neo4j.driver.internal.InternalPath;
 import org.neo4j.driver.v1.types.Node;
@@ -10,7 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.sight_spot_trip.entity.BusData;
 import com.sight_spot_trip.entity.PathWrapper;
+import com.sight_spot_trip.entity.SightSpotEdge;
 import com.sight_spot_trip.entity.SightSpotEdgeWrapper;
 import com.sight_spot_trip.entity.SightSpotNode;
 import com.sight_spot_trip.repository.SightSpotRepository;
@@ -62,5 +67,100 @@ public class SightSpotService {
 			pathWrapper = new PathWrapper(nodes, relationships, totalWeight);
 		}
 		return pathWrapper;
+	}
+
+	public PathWrapper findBusPath(String busName) {
+		List<Map<String, Object>> busPath = sightSpotRepository.findBusPath(busName);
+		PathWrapper pathWrapper = null;
+		if(busPath != null && !busPath.isEmpty()) {
+			Map<String, Object> map = (Map<String, Object>) busPath.get(0);
+			InternalPath path = (InternalPath) map.get("path");
+			Iterable<Node> nodes = path.nodes();
+			Iterable<Relationship> relationships = path.relationships();
+			pathWrapper = new PathWrapper(nodes, relationships, path.length());
+		}
+		return pathWrapper;
+	}
+
+	public SightSpotNode addNode(SightSpotNode node) {
+		SightSpotNode saveDNode = sightSpotRepository.save(node);
+		return saveDNode;
+	}
+
+	public SightSpotNode updateNode(SightSpotNode node) {
+		SightSpotNode saveDNode = sightSpotRepository.save(node);
+		return saveDNode;
+	}
+
+	@Transactional
+	public SightSpotEdge addEdge(SightSpotEdge edge) {
+		String nodeId1 = edge.getNode1().getNodeId();
+		String nodeId2 = edge.getNode2().getNodeId();
+		if(nodeId1.compareTo(nodeId2) > 0) {
+			nodeId1 = edge.getNode2().getNodeId();
+			nodeId2 = edge.getNode1().getNodeId();
+		}
+		SightSpotNode node1 = sightSpotRepository.findByNodeId(nodeId1);
+		SightSpotNode node2 = sightSpotRepository.findByNodeId(nodeId2);
+		edge.setNode1(node1);
+		edge.setNode1(node2);
+		node1.addNeighborEdge(edge);
+		SightSpotNode savedNode = sightSpotRepository.save(node1);
+		Set<SightSpotEdge> neighborEdges = savedNode.getNeighborEdges();
+		SightSpotEdge savedEdge = null;
+		for (SightSpotEdge neighborEdge : neighborEdges) {
+			if ((neighborEdge.getNode1().getNodeId().equals(edge.getNode1().getNodeId())
+					&& neighborEdge.getNode2().getNodeId().equals(edge.getNode2().getNodeId()))
+					|| (neighborEdge.getNode1().getNodeId().equals(edge.getNode2().getNodeId())
+							&& neighborEdge.getNode2().getNodeId().equals(edge.getNode1().getNodeId()))) {
+				savedEdge = neighborEdge;
+			}
+		}
+		return savedEdge;
+	}
+
+	@Transactional
+	public PathWrapper addBus(BusData busData) {
+		String busName = busData.getBusName();
+		List<String> nodeNames = busData.getNodeNames();
+		for(int i = 0; i < nodeNames.size() - 1; i++) {
+			SightSpotNode node1 = sightSpotRepository.findByNodeId(nodeNames.get(i));
+			SightSpotNode node2 = sightSpotRepository.findByNodeId(nodeNames.get(i + 1));
+			node1.addBus(busName);
+			node2.addBus(busName);
+			Set<SightSpotEdge> neighborEdges = node1.getNeighborEdges();
+			SightSpotEdge relatedEdge = null;
+			for (SightSpotEdge neighborEdge : neighborEdges) {
+				if ((neighborEdge.getNode1().getNodeId().equals(nodeNames.get(i))
+						&& neighborEdge.getNode2().getNodeId().equals(nodeNames.get(i + 1)))
+						|| (neighborEdge.getNode1().getNodeId().equals(nodeNames.get(i + 1))
+								&& neighborEdge.getNode2().getNodeId().equals(nodeNames.get(i)))) {
+					relatedEdge = neighborEdge;
+					relatedEdge.addBus(busName);
+				}
+			}
+			sightSpotRepository.save(node1);
+			sightSpotRepository.save(node2);
+		}
+		
+		List<Map<String, Object>> busPath = sightSpotRepository.findBusPath(busName);
+		PathWrapper pathWrapper = null;
+		if(busPath != null && !busPath.isEmpty()) {
+			Map<String, Object> map = (Map<String, Object>) busPath.get(0);
+			InternalPath path = (InternalPath) map.get("path");
+			Iterable<Node> nodes = path.nodes();
+			Iterable<Relationship> relationships = path.relationships();
+			pathWrapper = new PathWrapper(nodes, relationships, path.length());
+		}
+		return pathWrapper;
+	}
+
+	public Set<String> findBusNames() {
+		Set<String> busNames = new HashSet<>();
+		Iterable<SightSpotNode> nodes = sightSpotRepository.findAll();
+		nodes.forEach(node -> {
+			busNames.addAll(node.getBuses());
+		});
+		return busNames;
 	}
 }
