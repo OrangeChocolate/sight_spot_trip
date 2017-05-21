@@ -1,7 +1,7 @@
 #node_id,node_label,node_description,node_buses(delimiter by |)
-1,Sight Spot 1,This is description of Sight Spot 1
-2,Sight Spot 2,This is description of Sight Spot 2
-3,Sight Spot 3,This is description of Sight Spot 3
-4,Sight Spot 4,This is description of Sight Spot 4
-5,Sight Spot 5,This is description of Sight Spot 5
-6,Sight Spot 6,This is description of Sight Spot 6
+1,地点1,描述地点1
+2,地点2,描述地点2
+3,地点3,描述地点3
+4,地点4,描述地点4
+5,地点5,描述地点5
+6,地点6,描述地点6

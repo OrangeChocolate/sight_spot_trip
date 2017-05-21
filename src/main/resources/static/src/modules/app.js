@@ -1,5 +1,5 @@
 (function(){
     'use strict';
     angular
-        .module('app', ['ngCytoscape', 'hljs', 'ui.router', 'ngMaterial']);
+        .module('app', ['ngCytoscape', 'hljs', 'ui.router', 'ngMaterial', 'ngCookies']);
 })();

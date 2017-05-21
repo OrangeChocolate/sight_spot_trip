@@ -1,98 +1,74 @@
-<h3>查找最短路径</h3>
+<h3>管理公交线路</h3>
 <div class="row well row-without-margin-left-right">
-	<form class="form-horizontal">
-		<fieldset>
-			<legend>设置</legend>
-			<div class="form-group">
-				<label for="startNode" class="col-md-2 col-lg-2 control-label">起始景点</label>
-				<div class="col-md-10 col-lg-10">
-					<select id="startNode" class="form-control" ng-model="startNode">
-						<option ng-repeat="node in nodes" ng-value="node">{{node.nodeId}}-{{node.label}}</option>
-					</select>
-				</div>
-			</div>
-			<div class="form-group">
-				<label for="endNode" class="col-md-2 col-lg-2 control-label">结束景点</label>
-				<div class="col-md-10 col-lg-10">
-					<select id="endNode" class="form-control" ng-model="endNode">
-						<option ng-repeat="node in nodes" ng-value="node">{{node.nodeId}}-{{node.label}}</option>
-					</select>
-				</div>
-			</div>
-			<div class="form-group">
-				<label for="choice" class="col-md-2 col-lg-2 control-label">设置最短路径方法</label>
-				<div class="col-md-10 col-lg-10">
-					<select id="choice" class="form-control" ng-model="choice">
-						<option ng-repeat="choice in choices" ng-value="choice">{{choice.description}}</option>
-					</select>
-				</div>
-			</div>
-		</fieldset>
-	</form>
-	<form id="extra-attribute" class="form-inline" ng-show="choice.name == 'mix'">
-		<fieldset class="col-md-offset-2">
-			<div class="form-group">
-				<label for="distanceWeight">距离权重:</label> 
-				<select id="distanceWeight"
-					class="form-control inline-select" ng-model="distanceWeight">
-					<option ng-repeat="weight in weights" ng-value="weight">{{weight.value}}</option>
-				</select>
-			</div>
-			<div class="form-group">
-				<label for="timeWeight">时间权重:</label> 
-				<select id="timeWeight" class="form-control inline-select"
-					ng-model="timeWeight">
-					<option ng-repeat="weight in weights" ng-value="weight">{{weight.value}}</option>
-				</select>
-			</div>
-			<div class="form-group">
-				<label for="costWeight">费用权重:</label> 
-				<select id="costWeight" class="form-control inline-select"
-					ng-model="costWeight">
-					<option ng-repeat="weight in weights" ng-value="weight">{{weight.value}}</option>
-				</select>
-			</div>
-		</fieldset>
-	</form>
-	<form class="form-horizontal">
-		<div class="form-group">
-			<div class="col-md-10 col-lg-10 col-md-offset-2 col-lg-offset-2">
-				<button type="submit" class="btn btn-raised btn-primary" ng-click="search()">计算最短路劲</button>
-			</div>
-		</div>
-	</form>
-
-	<form class="form-horizontal">
-		<fieldset>
-			<legend>公交信息</legend>
-			<div class="form-group">
-				<label for="bus" class="col-md-2 col-lg-2 control-label">公交</label>
-				<div class="col-md-10 col-lg-10">
-					<select id="bus" class="form-control" ng-model="bus">
-						<option ng-repeat="bus in buses" ng-value="bus">{{bus}}</option>
-					</select>
-				</div>
-			</div>
-		</fieldset>
-	</form>
-	<form class="form-horizontal">
-		<div class="form-group">
-			<div class="col-md-10 col-lg-10 col-md-offset-2 col-lg-offset-2">
-				<button type="submit" class="btn btn-raised btn-primary" ng-click="searchBus()">查询公交线路</button>
-			</div>
-		</div>
-	</form>
-
-	<p class="lead">{{result}}</p>
 	
 	<form class="form-horizontal">
+		<fieldset>
+			<legend>新增边</legend>
+			<div class="form-group">
+				<label for="startNode" class="col-md-2 col-lg-2 control-label">起始节点</label>
+				<div class="col-md-10 col-lg-10">
+					<select id="startNode" class="form-control" ng-model="edge.node1">
+						<option ng-repeat="node in nodes" ng-value="node">{{node.nodeId}}-{{node.label}}</option>
+					</select>
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="endNode" class="col-md-2 col-lg-2 control-label">结束节点</label>
+				<div class="col-md-10 col-lg-10">
+					<select id="endNode" class="form-control" ng-model="edge.node2">
+						<option ng-repeat="node in nodes" ng-value="node">{{node.nodeId}}-{{node.label}}</option>
+					</select>
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="nodeDescription" class="col-md-2 col-lg-2 control-label">边ID</label>
+				<div class="col-md-10 col-lg-10">
+					<input id="nodeDescription" ng-model="edge.relationId" type="text" class="form-control" placeholder="edge id">
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="nodeDescription" class="col-md-2 col-lg-2 control-label">边标签</label>
+				<div class="col-md-10 col-lg-10">
+					<input id="nodeDescription" ng-model="edge.label" type="text" class="form-control" placeholder="edge label">
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="nodeDescription" class="col-md-2 col-lg-2 control-label">边描述</label>
+				<div class="col-md-10 col-lg-10">
+					<input id="nodeDescription" ng-model="edge.description" type="text" class="form-control" placeholder="edge description">
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="nodeDescription" class="col-md-2 col-lg-2 control-label">边距离</label>
+				<div class="col-md-10 col-lg-10">
+					<input id="nodeDescription" ng-model="edge.distance" type="text" class="form-control" placeholder="edge distance">
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="nodeDescription" class="col-md-2 col-lg-2 control-label">边时间</label>
+				<div class="col-md-10 col-lg-10">
+					<input id="nodeDescription" ng-model="edge.time" type="text" class="form-control" placeholder="edge time">
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="nodeDescription" class="col-md-2 col-lg-2 control-label">边花费</label>
+				<div class="col-md-10 col-lg-10">
+					<input id="nodeDescription" ng-model="edge.cost" type="text" class="form-control" placeholder="edge cost">
+				</div>
+			</div>
+		</fieldset>
+	</form>
+	<form class="form-horizontal">
 		<div class="form-group">
 			<div class="col-md-10 col-lg-10 col-md-offset-2 col-lg-offset-2">
-				<button class="btn btn-raised btn-primary" ng-click="animate_highlight()">动画演示路径</button>
-				<button class="btn btn-raised btn-primary" ng-click="reset()">复原图</button>
+				<button type="submit" class="btn btn-raised btn-primary" ng-click="addEdge()">增加边</button>
+				<button type="submit" class="btn btn-raised btn-primary" ng-click="deleteEdge()">删除边</button>
+				<button type="submit" class="btn btn-raised btn-primary" ng-click="updateEdge()">修改边</button>
 			</div>
 		</div>
 	</form>
+	
+	<p class="lead">{{result}}</p>
 </div>
 
 
@@ -167,4 +143,3 @@
 			graph-layout="layout" id="defaults-graph" graph-style="styles"></cytoscape>
 	</div>
 </div>
-

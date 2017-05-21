@@ -8,6 +8,8 @@ import java.util.Set;
 import org.neo4j.driver.internal.InternalPath;
 import org.neo4j.driver.v1.types.Node;
 import org.neo4j.driver.v1.types.Relationship;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,9 +20,12 @@ import com.sight_spot_trip.entity.SightSpotEdge;
 import com.sight_spot_trip.entity.SightSpotEdgeWrapper;
 import com.sight_spot_trip.entity.SightSpotNode;
 import com.sight_spot_trip.repository.SightSpotRepository;
+import com.sight_spot_trip.util.Utils;
 
 @Service
 public class SightSpotService {
+	
+	public static final Logger logger = LoggerFactory.getLogger(SightSpotService.class);
 
 	@Autowired
 	private SightSpotRepository sightSpotRepository;
@@ -102,7 +107,7 @@ public class SightSpotService {
 		SightSpotNode node1 = sightSpotRepository.findByNodeId(nodeId1);
 		SightSpotNode node2 = sightSpotRepository.findByNodeId(nodeId2);
 		edge.setNode1(node1);
-		edge.setNode1(node2);
+		edge.setNode2(node2);
 		node1.addNeighborEdge(edge);
 		SightSpotNode savedNode = sightSpotRepository.save(node1);
 		Set<SightSpotEdge> neighborEdges = savedNode.getNeighborEdges();
@@ -161,5 +166,52 @@ public class SightSpotService {
 			busNames.addAll(node.getBuses());
 		});
 		return busNames;
+	}
+
+	public SightSpotNode deleteNodeByNodeId(String nodeId) {
+		SightSpotNode node = sightSpotRepository.findByNodeId(nodeId);
+		sightSpotRepository.deleteNodeByNodeId(nodeId);
+		return node;
+	}
+
+	public SightSpotEdge deleteEdgeByNodeId(String nodeId1, String nodeId2) {
+		SightSpotEdge edge = sightSpotRepository.findEdgeByNodeId(nodeId1, nodeId2);
+		sightSpotRepository.deleteEdgeByNodeId(nodeId1, nodeId2);
+		return edge;
+	}
+
+	public SightSpotNode findByNodeId(String nodeId) {
+		return sightSpotRepository.findByNodeId(nodeId);
+	}
+
+	@Transactional
+	public SightSpotEdge updateEdge(String nodeId1, String nodeId2, SightSpotEdge edge) {
+		String startNode = nodeId1;
+		if(nodeId1.compareTo(nodeId2) > 0) {
+			startNode = nodeId2;
+		}
+		SightSpotNode node1 = sightSpotRepository.findByNodeId(startNode);
+		Set<SightSpotEdge> neighborEdges = node1.getNeighborEdges();
+		SightSpotEdge needToUpdateEdge = null;
+		for(SightSpotEdge neighborEdge: neighborEdges) {
+			if(neighborEdge.getNode1().getNodeId().equals(nodeId1) && neighborEdge.getNode2().getNodeId().equals(nodeId2)) {
+				needToUpdateEdge = neighborEdge;
+			}
+		}
+		if(needToUpdateEdge == null) {
+			logger.error("updateEdge error, could not find specified edge! {}-{}", nodeId1, nodeId2);
+			return null;
+		}
+		neighborEdges.remove(needToUpdateEdge);
+		needToUpdateEdge = Utils.mergeObjects(needToUpdateEdge, edge);
+		neighborEdges.add(needToUpdateEdge);
+		node1.setNeighborEdges(neighborEdges);
+		SightSpotNode updatedNode = sightSpotRepository.save(node1);
+		for(SightSpotEdge neighborEdge: updatedNode.getNeighborEdges()) {
+			if(neighborEdge.getNode1().getNodeId().equals(nodeId1) && neighborEdge.getNode2().getNodeId().equals(nodeId2)) {
+				needToUpdateEdge = neighborEdge;
+			}
+		}
+		return needToUpdateEdge;
 	}
 }

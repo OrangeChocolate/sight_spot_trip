@@ -8,6 +8,7 @@ import org.springframework.data.neo4j.repository.GraphRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
+import com.sight_spot_trip.entity.SightSpotEdge;
 import com.sight_spot_trip.entity.SightSpotEdgeWrapper;
 import com.sight_spot_trip.entity.SightSpotNode;
 
@@ -97,6 +98,15 @@ public interface SightSpotRepository extends GraphRepository<SightSpotNode> {
 			"WITH COLLECT(path) AS paths, MAX(length(path)) AS maxLength " +
 			"RETURN FILTER(path IN paths WHERE length(path)= maxLength)[0] AS path")
 	public List<Map<String, Object>> findBusPath(@Param("busName") String busName);
+
+	@Query("MATCH (n:SightSpotNode { nodeId:{nodeId} }) detach delete n")
+	void deleteNodeByNodeId(@Param("nodeId") String nodeId);
+
+	@Query("MATCH (m:SightSpotNode { nodeId:{nodeId1} })-[r:CONNECT]-(n:SightSpotNode { nodeId:{nodeId2} }) return r")
+	SightSpotEdge findEdgeByNodeId(@Param("nodeId1") String nodeId1, @Param("nodeId2") String nodeId2);
+
+	@Query("MATCH (m:SightSpotNode { nodeId:{nodeId1} })-[r:CONNECT]-(n:SightSpotNode { nodeId:{nodeId2} }) delete r")
+	void deleteEdgeByNodeId(@Param("nodeId1") String nodeId1, @Param("nodeId2") String nodeId2);
 
 //	@Query( "START u1=node:User(key= {0}), u2=node:User(key = {1}) " +
 //	        "MATCH p = shortestPath(u1-[*]-u2) " +

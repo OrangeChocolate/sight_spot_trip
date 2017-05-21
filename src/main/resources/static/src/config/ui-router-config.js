@@ -3,8 +3,9 @@
 
     angular
         .module('app')
-        .config(function ($stateProvider, $urlRouterProvider) {
+        .config(function ($stateProvider, $urlRouterProvider, $locationProvider) {
             $urlRouterProvider.otherwise("/home");
+//            $locationProvider.html5Mode(true);
             //
             // Now set up the states
             $stateProvider
@@ -13,15 +14,25 @@
                     templateUrl: "templates/home.html",
                     controller: 'homeController'
                 })
-                .state('core', {
+                .state('about', {
                     url: "/about",
                     templateUrl: "templates/about.html",
                     controller: 'aboutController'
                 })
-                .state('admin', {
-                    url: "/admin",
-                    templateUrl: "templates/admin.html",
-                    controller: 'adminController'
+                .state('adminNode', {
+                    url: "/adminNode",
+                    templateUrl: "templates/admin-node.html",
+                    controller: 'adminNodeController'
+                })
+                .state('adminEdge', {
+                    url: "/adminEdge",
+                    templateUrl: "templates/admin-edge.html",
+                    controller: 'adminEdgeController'
+                })
+                .state('adminBus', {
+                    url: "/adminBus",
+                    templateUrl: "templates/admin-bus.html",
+                    controller: 'adminBusController'
                 });
         });
 })();

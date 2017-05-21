@@ -25,6 +25,7 @@
     "angular-route": "^1.6.4",
     "angular-material": "^1.1.4",
     "angular-ui-router": "^1.0.3",
-    "angular-highlightjs": "^0.7.1"
+    "angular-highlightjs": "^0.7.1",
+    "angular-cookies": "^1.6.4"
   }
 }

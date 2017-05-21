@@ -1,7 +1,7 @@
 (function(){
     'use strict';
 
-    angular.module('app').controller('adminController', function ($scope, cytoData, $http, $timeout, $state, utils){
+    angular.module('app').controller('adminNodeController', function ($scope, cytoData, $http, $timeout, $state, utils){
         $scope.defaults = {
             zoomingEnabled: true,
             userPanningEnabled: true
@@ -90,12 +90,12 @@
         $scope.elements = [];
         
         var nodes, edges, elements = [];
-        $http.get("/nodes").then(function (response) {
+        $http.get("/api/nodes").then(function (response) {
             $scope.nodes = nodes = response.data;
             $scope.startNode = nodes[0];
             $scope.endNode = nodes[4];
             
-            $http.get("/edges").then(function (response) {
+            $http.get("/api/edges").then(function (response) {
             	$scope.edges = edges = response.data;
             	
                 for(var i = 0; i < nodes.length; i++) {
@@ -126,8 +126,32 @@
         
 
 		$scope.addNode = function() {
+			delete $scope.node.id;
 			var data = JSON.stringify($scope.node);
-			$http.post("/nodes", data).then(
+			$http.post("/api/nodes", data).then(
+					function(data, status, headers, config) {
+						console.log(data);
+						$state.go($state.current, {}, {reload: true});
+					}, function(data, status, headers, config) {
+						console.log(data);
+					});
+		};
+        
+
+		$scope.deleteNode = function() {
+			$http.delete("/api/nodes/" + $scope.node.nodeId).then(
+					function(data, status, headers, config) {
+						console.log(data);
+						$state.go($state.current, {}, {reload: true});
+					}, function(data, status, headers, config) {
+						console.log(data);
+					});
+		};
+        
+
+		$scope.updateNode = function() {
+			var data = JSON.stringify($scope.node);
+			$http.put("/api/nodes/" + $scope.node.nodeId, data).then(
 					function(data, status, headers, config) {
 						console.log(data);
 						$state.go($state.current, {}, {reload: true});
@@ -138,6 +162,12 @@
 		
 
         $scope.edge = {
+            relationId: "",
+            label: "",
+            description: "",
+        	distance: 0,
+        	time: 0,
+        	cost: 0,
     		node1: {
     			nodeId: ""
     		},
@@ -148,10 +178,31 @@
         
 
 		$scope.addEdge = function() {
-			$scope.edge.node1.nodeId = $scope.startNode.nodeId;
-			$scope.edge.node2.nodeId = $scope.endNode.nodeId;
+			delete $scope.edge.id;
 			var data = JSON.stringify($scope.edge);
-			$http.post("/edges", data).then(
+			$http.post("/api/edges", data).then(
+					function(data, status, headers, config) {
+						console.log(data);
+						$state.go($state.current, {}, {reload: true});
+					}, function(data, status, headers, config) {
+						console.log(data);
+					});
+		};
+
+		$scope.deleteEdge = function() {
+			var data = JSON.stringify($scope.edge);
+			$http.delete("/api/edges/" + $scope.edge.node1.nodeId + "/" + $scope.edge.node2.nodeId).then(
+					function(data, status, headers, config) {
+						console.log(data);
+						$state.go($state.current, {}, {reload: true});
+					}, function(data, status, headers, config) {
+						console.log(data);
+					});
+		};
+		
+		$scope.updateEdge = function() {
+			var data = JSON.stringify($scope.edge);
+			$http.put("/api/edges/" + $scope.edge.node1.nodeId + "/" + $scope.edge.node2.nodeId, data).then(
 					function(data, status, headers, config) {
 						console.log(data);
 						$state.go($state.current, {}, {reload: true});
@@ -170,7 +221,7 @@
 		$scope.addBus = function() {
 			$scope.bus.nodeNames = $scope.bus.nodeNames.split(/\s*,\s*/);
 			var data = JSON.stringify($scope.bus);
-			$http.post("/bus", data).then(
+			$http.post("/api/bus", data).then(
 					function(data, status, headers, config) {
 						console.log(data);
 						$state.go($state.current, {}, {reload: true});
@@ -205,14 +256,40 @@
         		highlightedEdges[i].removeClass('highlighted');
         	}
         };
+        
+        var findNodeByNodeId = function(nodeId) {
+        	for(var node of $scope.nodes) {
+        		if(node.nodeId == nodeId) {
+        			return node;
+        		}
+        	}
+        	return null;
+        }
 
         $scope.selected_element = null;
         $scope.$on('cy:node:click', function(ng,cy){
         	$scope.selected_element = angular.extend(angular.extend({}, cy.cyTarget.attr()),{isNode: cy.cyTarget.isNode(), isEdge: cy.cyTarget.isEdge()});
+        	$scope.node = {
+            		id: $scope.selected_element.id,
+            		nodeId: $scope.selected_element.nodeId,
+            		label: $scope.selected_element.label,
+            		description: $scope.selected_element.description
+            };
             $scope.$apply();
         });
         $scope.$on('cy:edge:click', function(ng,cy){
         	$scope.selected_element = angular.extend(angular.extend({}, cy.cyTarget.attr()),{isNode: cy.cyTarget.isNode(), isEdge: cy.cyTarget.isEdge()});
+            $scope.edge = {
+                id: $scope.selected_element.id,
+                relationId: $scope.selected_element.relationId,
+        		label: $scope.selected_element.label,
+        		description: $scope.selected_element.description,
+            	distance: $scope.selected_element.distance,
+            	time: $scope.selected_element.time,
+            	cost: $scope.selected_element.cost,
+        		node1: findNodeByNodeId($scope.selected_element.node1.nodeId),
+        		node2: findNodeByNodeId($scope.selected_element.node2.nodeId)
+        	};
             $scope.$apply();
         });
         
