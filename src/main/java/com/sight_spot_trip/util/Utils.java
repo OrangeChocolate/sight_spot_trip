@@ -1,8 +1,14 @@
 package com.sight_spot_trip.util;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Map;
+import java.util.stream.Stream;
+
+import org.springframework.core.io.Resource;
 
 public class Utils {
 
@@ -28,5 +34,26 @@ public class Utils {
 			e.printStackTrace();
 		}
 		return (T) exist;
+	}
+	
+
+	
+	public static Stream<String> getResourceContentStream(Resource resources) {
+		BufferedReader reader = null;
+		try {
+			reader = new BufferedReader(new InputStreamReader(resources.getInputStream()));
+			return reader.lines();
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		} finally {
+			try {
+				if (reader != null) {
+					reader.close();
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return null;
 	}
 }

@@ -1,10 +1,16 @@
 package com.sight_spot_trip.service;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URI;
 import java.nio.charset.Charset;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -19,12 +25,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 
 import com.sight_spot_trip.entity.PairOrderIndependent;
 import com.sight_spot_trip.entity.SightSpotEdge;
 import com.sight_spot_trip.entity.SightSpotNode;
 import com.sight_spot_trip.repository.SightSpotRepository;
+import com.sight_spot_trip.util.Utils;
 
 @Service
 public class DataImportService {
@@ -52,8 +60,8 @@ public class DataImportService {
 	private Map<PairOrderIndependent<String>, List<String>> cachedRelatedBuses = new HashMap<>();
 
 	private void parseNode() {
-		try (Stream<String> lines = Files.lines(Paths.get(nodeResources.getURI()), Charset.defaultCharset())) {
-			lines.forEach(line -> {
+		Stream<String> nodeResourceStrean = Utils.getResourceContentStream(nodeResources);
+		nodeResourceStrean.forEach(line -> {
 				if (line != null && !line.equals("") && !line.startsWith("#")) {
 					String[] parts = line.split("\\s*,\\s*");
 					if (parts.length < 3) {
@@ -66,58 +74,50 @@ public class DataImportService {
 					cachedNodes.put(nodeId, new SightSpotNode(nodeId, label, description));
 				}
 			});
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		
 	}
 
 	private void parseEdge() {
-		try (Stream<String> lines = Files.lines(Paths.get(edgeResources.getURI()), Charset.defaultCharset())) {
-			lines.forEach(line -> {
-				if (line != null && !line.equals("") && !line.startsWith("#")) {
-					String[] parts = line.split("\\s*,\\s*");
-					if (parts.length < 8) {
-						logger.error("error parsing the edge line {}", line);
-						return;
-					}
-					String relationId = parts[0];
-					String label = parts[1];
-					String node1Id = parts[2];
-					String node2Id = parts[3];
-					int distance = Integer.parseInt(parts[4]);
-					int time = Integer.parseInt(parts[5]);
-					int cost = Integer.parseInt(parts[6]);
-					String description = parts[7];
-					SightSpotEdge edge = new SightSpotEdge(relationId, label, cachedNodes.get(node1Id),
-							cachedNodes.get(node2Id), distance, time, cost, description);
-					cachedEdges.put(relationId, edge);
-					cachedPairEdges.put(new PairOrderIndependent<>(node1Id, node2Id), edge);
-					updateCachedRelatedNodes(cachedNodes.get(node1Id), cachedNodes.get(node2Id));
-					updateCachedRelatedEdges(cachedNodes.get(node1Id), edge);
+		Stream<String> edgeResourceStrean = Utils.getResourceContentStream(edgeResources);
+		edgeResourceStrean.forEach(line -> {
+			if (line != null && !line.equals("") && !line.startsWith("#")) {
+				String[] parts = line.split("\\s*,\\s*");
+				if (parts.length < 8) {
+					logger.error("error parsing the edge line {}", line);
+					return;
 				}
-			});
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+				String relationId = parts[0];
+				String label = parts[1];
+				String node1Id = parts[2];
+				String node2Id = parts[3];
+				int distance = Integer.parseInt(parts[4]);
+				int time = Integer.parseInt(parts[5]);
+				int cost = Integer.parseInt(parts[6]);
+				String description = parts[7];
+				SightSpotEdge edge = new SightSpotEdge(relationId, label, cachedNodes.get(node1Id),
+						cachedNodes.get(node2Id), distance, time, cost, description);
+				cachedEdges.put(relationId, edge);
+				cachedPairEdges.put(new PairOrderIndependent<>(node1Id, node2Id), edge);
+				updateCachedRelatedNodes(cachedNodes.get(node1Id), cachedNodes.get(node2Id));
+				updateCachedRelatedEdges(cachedNodes.get(node1Id), edge);
+			}
+		});
 	}
 
 	private void parseBus() {
-		try (Stream<String> lines = Files.lines(Paths.get(busResources.getURI()), Charset.defaultCharset())) {
-			lines.forEach(line -> {
-				if (line != null && !line.equals("") && !line.startsWith("#")) {
-					String[] parts = line.split("\\s*,\\s*");
-					if (parts.length < 2) {
-						logger.error("error parsing the bus line {}", line);
-						return;
-					}
-					String busName = parts[0];
-					List<String> buses = Stream.of(parts[1].split("\\|")).collect(Collectors.toList());
-					cachedBuses.put(busName, buses);
+		Stream<String> busResourceStrean = Utils.getResourceContentStream(busResources);
+		busResourceStrean.forEach(line -> {
+			if (line != null && !line.equals("") && !line.startsWith("#")) {
+				String[] parts = line.split("\\s*,\\s*");
+				if (parts.length < 2) {
+					logger.error("error parsing the bus line {}", line);
+					return;
 				}
-			});
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+				String busName = parts[0];
+				List<String> buses = Stream.of(parts[1].split("\\|")).collect(Collectors.toList());
+				cachedBuses.put(busName, buses);
+			}
+		});
 	}
 
 	private void initCachedRelatedNodesAndEdges() {
@@ -250,7 +250,7 @@ public class DataImportService {
 		parseBusReverse();
 		updateBuses();
 
-		test();
+		//test();
 	}
 
 }
