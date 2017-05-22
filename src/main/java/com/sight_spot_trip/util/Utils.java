@@ -4,11 +4,17 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
 import org.springframework.core.io.Resource;
+import org.springframework.util.StringUtils;
 
 public class Utils {
 
@@ -41,8 +47,14 @@ public class Utils {
 	public static Stream<String> getResourceContentStream(Resource resources) {
 		BufferedReader reader = null;
 		try {
-			reader = new BufferedReader(new InputStreamReader(resources.getInputStream()));
-			return reader.lines();
+			List<String> lines = new ArrayList<String>();
+			reader = new BufferedReader(new InputStreamReader(resources.getInputStream(), StandardCharsets.UTF_8));
+			String line = reader.readLine();
+			while(!StringUtils.isEmpty(line)){
+				lines.add(line);
+			    line = reader.readLine();
+			}
+			return lines.stream();
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		} finally {
