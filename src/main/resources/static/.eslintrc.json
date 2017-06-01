@@ -6,12 +6,12 @@
     "rules": {
     
         "indent": [
-            "warn",
-            4
+            "error",
+            2
         ],
         "linebreak-style": [
             "warn",
-            "windows"
+            "unix"
         ],
         "quotes": [
             "error",
@@ -20,7 +20,6 @@
         "semi": [
             "error",
             "always"
-        ],
-        "no-mixed-spaces-and-tabs": ["error", "smart-tabs"]
+        ]
     }
 }

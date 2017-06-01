@@ -1,4 +1,4 @@
-#relation_id,relation_label,node_1_id,node_2_id,distance,time,cost
+#relationId,label,node1Id,node2Id,distance,time,cost
 边1,CONNECT,1,2,7,1,1,这是一些描述
 边2,CONNECT,1,3,9,1,1,这是一些描述
 边3,CONNECT,1,6,14,1,1,这是一些描述

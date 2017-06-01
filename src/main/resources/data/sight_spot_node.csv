@@ -1,4 +1,4 @@
-#node_id,node_label,node_description,node_buses(delimiter by |)
+#nodeId,label,description
 1,地点1,描述地点1
 2,地点2,描述地点2
 3,地点3,描述地点3

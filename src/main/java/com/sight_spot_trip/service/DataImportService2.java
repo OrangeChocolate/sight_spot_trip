@@ -35,17 +35,17 @@ import com.sight_spot_trip.repository.SightSpotRepository;
 import com.sight_spot_trip.util.Utils;
 
 @Service
-public class DataImportService {
+public class DataImportService2 {
 	
-	public static final Logger logger = LoggerFactory.getLogger(DataImportService.class);
+	public static final Logger logger = LoggerFactory.getLogger(DataImportService2.class);
 
-	@Value(value = "classpath:data/sight_spot_node.csv")
+	@Value(value = "classpath:data/nodes.csv")
 	private Resource nodeResources;
 
-	@Value(value = "classpath:data/sight_spot_edge.csv")
+	@Value(value = "classpath:data/edges.csv")
 	private Resource edgeResources;
 
-	@Value(value = "classpath:data/sight_spot_bus.csv")
+	@Value(value = "classpath:data/buses.csv")
 	private Resource busResources;
 
 	@Autowired
@@ -73,13 +73,13 @@ public class DataImportService {
 			lines.forEach(line -> {
 				if (line != null && !line.equals("") && !line.startsWith("#")) {
 					String[] parts = line.split("\\s*,\\s*");
-					if (parts.length < 3) {
+					if (parts.length < 2) {
 						logger.error("error parsing the node line {}", line);
 						return;
 					}
 					String nodeId = parts[0];
 					String label = parts[1];
-					String description = parts[2];
+					String description = "";
 					cachedNodes.put(nodeId, new SightSpotNode(nodeId, label, description));
 				}
 			});
@@ -93,18 +93,18 @@ public class DataImportService {
 		edgeResourceStrean.forEach(line -> {
 			if (line != null && !line.equals("") && !line.startsWith("#")) {
 				String[] parts = line.split("\\s*,\\s*");
-				if (parts.length < 8) {
+				if (parts.length < 3) {
 					logger.error("error parsing the edge line {}", line);
 					return;
 				}
 				String relationId = parts[0];
-				String label = parts[1];
-				String node1Id = parts[2];
-				String node2Id = parts[3];
-				int distance = Integer.parseInt(parts[4]);
-				int time = Integer.parseInt(parts[5]);
-				int cost = Integer.parseInt(parts[6]);
-				String description = parts[7];
+				String label = "";
+				String node1Id = parts[1];
+				String node2Id = parts[2];
+				int distance = 1;
+				int time = 1;
+				int cost = 1;
+				String description = "";
 				SightSpotEdge edge = new SightSpotEdge(relationId, label, cachedNodes.get(node1Id),
 						cachedNodes.get(node2Id), distance, time, cost, description);
 				cachedEdges.put(relationId, edge);

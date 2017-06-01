@@ -1,6 +1,7 @@
 package com.sight_spot_trip.service;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
@@ -8,6 +9,7 @@ import java.nio.charset.Charset;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -20,6 +22,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,21 +38,19 @@ import com.sight_spot_trip.repository.SightSpotRepository;
 import com.sight_spot_trip.util.Utils;
 
 @Service
-public class DataImportService {
+public class BusDataReverseTransformService {
 	
-	public static final Logger logger = LoggerFactory.getLogger(DataImportService.class);
+	public static final Logger logger = LoggerFactory.getLogger(BusDataReverseTransformService.class);
 
-	@Value(value = "classpath:data/sight_spot_node.csv")
+	@Value(value = "classpath:data/nodes.csv")
 	private Resource nodeResources;
 
-	@Value(value = "classpath:data/sight_spot_edge.csv")
+	@Value(value = "classpath:data/edges.csv")
 	private Resource edgeResources;
 
-	@Value(value = "classpath:data/sight_spot_bus.csv")
+	@Value(value = "classpath:data/buses.csv")
 	private Resource busResources;
 
-	@Autowired
-	private SightSpotRepository sightSpotRepository;
 
 	private Map<String, SightSpotNode> cachedNodes = new HashMap<>();
 	private Map<String, SightSpotEdge> cachedEdges = new HashMap<>();
@@ -73,13 +74,13 @@ public class DataImportService {
 			lines.forEach(line -> {
 				if (line != null && !line.equals("") && !line.startsWith("#")) {
 					String[] parts = line.split("\\s*,\\s*");
-					if (parts.length < 3) {
+					if (parts.length < 2) {
 						logger.error("error parsing the node line {}", line);
 						return;
 					}
 					String nodeId = parts[0];
 					String label = parts[1];
-					String description = parts[2];
+					String description = "";
 					cachedNodes.put(nodeId, new SightSpotNode(nodeId, label, description));
 				}
 			});
@@ -93,18 +94,18 @@ public class DataImportService {
 		edgeResourceStrean.forEach(line -> {
 			if (line != null && !line.equals("") && !line.startsWith("#")) {
 				String[] parts = line.split("\\s*,\\s*");
-				if (parts.length < 8) {
+				if (parts.length < 3) {
 					logger.error("error parsing the edge line {}", line);
 					return;
 				}
 				String relationId = parts[0];
-				String label = parts[1];
-				String node1Id = parts[2];
-				String node2Id = parts[3];
-				int distance = Integer.parseInt(parts[4]);
-				int time = Integer.parseInt(parts[5]);
-				int cost = Integer.parseInt(parts[6]);
-				String description = parts[7];
+				String label = "";
+				String node1Id = parts[1];
+				String node2Id = parts[2];
+				int distance = 1;
+				int time = 1;
+				int cost = 1;
+				String description = "";
 				SightSpotEdge edge = new SightSpotEdge(relationId, label, cachedNodes.get(node1Id),
 						cachedNodes.get(node2Id), distance, time, cost, description);
 				cachedEdges.put(relationId, edge);
@@ -156,25 +157,7 @@ public class DataImportService {
 		node1RelatedEdges.add(edge);
 	}
 
-	private void insertNodes() {
-		Set<Entry<String, SightSpotNode>> entrySet = cachedNodes.entrySet();
-		for (Entry<String, SightSpotNode> entry : entrySet) {
-			SightSpotNode node = entry.getValue();
-			SightSpotNode persistedNode = sightSpotRepository.save(node);
-			cachedNodes.put(entry.getKey(), persistedNode);
-		}
-	}
 
-	private void updateNeighbors() {
-		Set<Entry<String, SightSpotNode>> entrySet = cachedNodes.entrySet();
-		for (Entry<String, SightSpotNode> entry : entrySet) {
-			SightSpotNode node = entry.getValue();
-			// node.setNeighbors(cachedRelatedNodes.get(entry.getKey()));
-			node.setNeighborEdges(cachedRelatedEdges.get(entry.getKey()));
-			SightSpotNode persistedNode = sightSpotRepository.save(node);
-			cachedNodes.put(entry.getKey(), persistedNode);
-		}
-	}
 	
 	Map<String, List<String>> nodeBusesMap = new HashMap<>();
 	Map<PairOrderIndependent<String>, List<String>> edgeBusesMap = new HashMap<>();
@@ -212,39 +195,8 @@ public class DataImportService {
 		}
 	}
 
-	private void updateBuses() {
-		Set<Entry<String, SightSpotNode>> entrySet = cachedNodes.entrySet();
-		for (Entry<String, SightSpotNode> entry : entrySet) {
-			SightSpotNode node = entry.getValue();
-			List<String> nodeBusList = nodeBusesMap.get(node.getNodeId());
-			if (nodeBusList != null) {
-				node.setBuses(new HashSet<String>(nodeBusesMap.get(node.getNodeId())));
-			}
-			Set<SightSpotEdge> relatedEdges = cachedRelatedEdges.get(entry.getKey());
-			for (SightSpotEdge edge : relatedEdges) {
-				List<String> edgeBusList = edgeBusesMap.get(
-						new PairOrderIndependent<String>(edge.getNode1().getNodeId(), edge.getNode2().getNodeId()));
-				if (edgeBusList != null) {
-					edge.setBuses(new HashSet<String>(edgeBusList));
-				}
-			}
-			node.setNeighborEdges(relatedEdges);
-			SightSpotNode persistedNode = sightSpotRepository.save(node);
-			cachedNodes.put(entry.getKey(), persistedNode);
-		}
-	}
 	
-
-	private void test() {
-		Iterable<SightSpotNode> nodes = sightSpotRepository.findAll();
-		nodes.forEach(node -> {
-			logger.info("{}", node);
-		});
-	}
-
 	public void initilization() {
-		// clean the database
-		sightSpotRepository.clean();
 		// parse nodes
 		parseNode();
 		// initCachedRelatedNodes
@@ -252,16 +204,44 @@ public class DataImportService {
 		// parse edges
 		parseEdge();
 
-		// insert nodes
-		insertNodes();
-		// update neighbors
-		updateNeighbors();
-		
 		parseBus();
+		
 		parseBusReverse();
-		updateBuses();
+		
+		// write reverse data to file
+		writeBusReverseDataToCSV();
+	}
 
-		//test();
+	private void writeBusReverseDataToCSV() {
+		Path nodePath = Paths.get("d:/bus_node.csv");
+		Path edgePath = Paths.get("d:/bus_edge.csv");
+		
+		// Use try-with-resource to get auto-closeable writer instance
+		// Write bus_node.csv
+		try (BufferedWriter writer = Files.newBufferedWriter(nodePath)) 
+		{
+			// insert csv header
+		    writer.write("#nodeId,buses\n");
+			Set<Entry<String, List<String>>> nodeEntrySet = nodeBusesMap.entrySet();
+			for(Entry<String, List<String>> entry: nodeEntrySet) {
+				writer.write(String.format("%s,%s\n", entry.getKey(), StringUtils.join(entry.getValue(), "|")));
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		// Write bus_edge.csv
+		try (BufferedWriter writer = Files.newBufferedWriter(edgePath)) 
+		{
+			// insert csv header
+		    writer.write("#node1Id,#node2Id,buses\n");
+			Set<Entry<PairOrderIndependent<String>, List<String>>> edgeEntrySet = edgeBusesMap.entrySet();
+			for(Entry<PairOrderIndependent<String>, List<String>> entry: edgeEntrySet) {
+				writer.write(String.format("%s,%s,%s\n", entry.getKey().getElement1(), entry.getKey().getElement2(), StringUtils.join(entry.getValue(), "|")));
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 }
