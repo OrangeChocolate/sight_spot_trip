@@ -1119,8 +1119,7 @@
             {
                 selector: 'node',
                 style:{
-                   content: 'data(nodeId)',
-                   'background-color': 'mapData(weight, 0, 100, blue, red)'
+                   content: 'data(nodeId)'
                 }
             },
             {
@@ -1303,14 +1302,26 @@
             	}).map(function(id) {
             		return $scope.graph.getElementById(id);
             	});
+            	var shortestPathNodes = $scope.pathNodes.map(function(node) {
+            		return node.id;
+            	}).map(function(id) {
+            		return $scope.graph.getElementById(id);
+            	});
             	highlightedEdges = shortestPathEdges;
             	
-            	for (var i = 1; i <= shortestPathEdges.length; i++) {
-            	    (function(index, shortestPathEdges) {
+            	var shortestPathElements = [];
+            	for (var i = 0; i < shortestPathNodes.length - 1; i++) {
+            		shortestPathElements.push(shortestPathNodes[i]);
+            		shortestPathElements.push(shortestPathEdges[i]);
+            	}
+        		shortestPathElements.push(shortestPathNodes[shortestPathNodes.length - 1]);
+            	
+            	for (var i = 1; i <= shortestPathElements.length; i++) {
+            	    (function(index, shortestPathElements) {
             	        setTimeout(function() {
-            	        	shortestPathEdges[index - 1].addClass('highlighted');
+            	        	shortestPathElements[index - 1].addClass('highlighted');
             	        }, index * 500);
-            	    })(i, shortestPathEdges);
+            	    })(i, shortestPathElements);
             	}
             }, 100);
         };
@@ -1322,6 +1333,10 @@
         	var allEdges = $scope.graph.edges();
         	for(var i = 0; i < allEdges.length; i++) {
         		allEdges[i].removeClass('highlighted');
+        	}
+        	var allNodes = $scope.graph.nodes();
+        	for(var i = 0; i < allNodes.length; i++) {
+        		allNodes[i].removeClass('highlighted');
         	}
         };
 
